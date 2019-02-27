@@ -1,0 +1,15 @@
+VERSION {
+	VER_0.0 {
+	global:
+		pq_create;
+		pq_del;
+		pq_delmax;
+		pq_destroy;
+		pq_getmax;
+		pq_insert;
+		pq_reprio;
+		pq_size;
+		pq_walk;
+	local: *;
+	};
+};

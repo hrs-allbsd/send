@@ -1,0 +1,12 @@
+INSSBIN= $(PREFIXSBIN)/$(PROG)
+
+$(INSSBIN): $(PROG)
+	install $< $@
+
+install: all $(PREFIXSBIN) $(INSSBIN) $(EXTRAINSTALL)
+
+$(PREFIXSBIN):
+	mkdir -p $@
+
+uninstall:
+	$(RM) $(INSSBIN) $(EXTRAUNINSTALL)

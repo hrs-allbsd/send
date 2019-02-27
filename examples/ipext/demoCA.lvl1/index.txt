@@ -1,0 +1,3 @@
+V	061108021633Z		00	unknown	/C=AU/ST=Some-State/O=Internet Widgits Pty Ltd/CN=ar1/emailAddress=ar1@example.com
+V	061108021741Z		01	unknown	/C=AU/ST=Some-State/O=Internet Widgits Pty Ltd/CN=ar2/emailAddress=ar2@example.com
+V	061108021820Z		02	unknown	/C=AU/ST=Some-State/O=Internet Widgits Pty Ltd/CN=ar3/emailAddress=ar3@example.com

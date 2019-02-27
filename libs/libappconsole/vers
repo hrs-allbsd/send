@@ -1,0 +1,13 @@
+VERSION {
+	VER_0.0 {
+	global:
+		console_exit;
+		console_init;
+		console_read;
+	local: *;
+	};
+	VER_0.1 {
+	global:
+		console_read_char;
+	};
+};

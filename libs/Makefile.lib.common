@@ -1,0 +1,56 @@
+
+CFLAGS += -Wall -O3
+
+ifeq ($(DEBUG_POLICY),DEBUG)
+CPPFLAGS += -g # enable for general debugging
+ifeq ($(LOG_BACKTRACE),y)
+CFLAGS += -rdynamic # so we get syms during backtraces, used only for debugging
+endif
+endif
+
+BLDHDR_INST= ../../include
+BLDLIB_INST= ../.libs
+
+CPPFLAGS += -I$(BLDHDR_INST)
+
+INSHDRS= $(patsubst %,$(PREFIXINC)/%,$(INC))
+BLDHDRS= $(patsubst %,$(BLDHDR_INST)/%,$(INC))
+
+LDLIBS += $(patsubst %,-l%,$(DEP_LIBS))
+LDFLAGS += -L$(BLDLIB_INST)
+
+all: $(BLDLIB_INST) $(BLDHDRS) archive_$(CREATE_ARCHIVE) shared_$(CREATE_SHARED) # $(TESTS) disabled for dist
+
+$(BLDLIB_INST):
+	mkdir $@
+
+$(OBJS): $(INC) Makefile ../Makefile.lib.common ../../Makefile.config
+
+install: all $(PREFIXLIB) $(PREFIXINC) $(INSHDRS) archive_install_$(CREATE_ARCHIVE) shared_install_$(CREATE_SHARED)
+
+$(PREFIXLIB)/%: %
+	install $< $(PREFIXLIB);
+
+$(BLDLIB_INST)/%: %
+	install $< $(BLDLIB_INST);
+
+$(PREFIXINC)/%: %
+	install $< $(PREFIXINC);
+
+$(BLDHDR_INST)/%: %
+	install $< $(BLDHDR_INST);
+
+$(PREFIXLIB) $(PREFIXINC):
+	mkdir -p $@
+
+uninstall:
+	$(RM) $(INSLIB) $(INSLIBLINK) $(INSHDRS)
+
+runtest:
+	$(patsubst %,./% &&,$(RUNTESTS)) echo OK
+
+clean: archive_clean_$(CREATE_ARCHIVE) shared_clean_$(CREATE_SHARED)
+	$(RM) *.o *~ $(TESTS) $(EXTRACLEAN)
+
+include ../Makefile.ar
+include ../Makefile.so

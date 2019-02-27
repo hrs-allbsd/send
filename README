@@ -1,0 +1,50 @@
+
+This an implementation of Secure Neighbor Discovery (SEND), IETF RTF 3971.
+
+For full instructions on how to build and use this, please see
+docs/UserGuide.pdf.
+
+DEPENDANCIES
+============
+Here is a quick summary of what you will need to build SEND on your system.
+
+All platforms:
+  o GNU make
+  o GCC
+  o lex
+  o yacc
+  o libcrypto 0.9.7 (library and headers) or greater
+  o libreadline, libncurses (libraries and headers)
+
+Linux:
+  o CONFIG_NETFILTER, CONFIG_IPV6, CONFIG_IP6_NF_QUEUE, CONFIG_IP6_NF_IPTABLES,
+    CONFIG_IP6_NF_FILTER enabled in your kernel config.
+  o netfilter ip6tables command
+  o netfilter libipq development library and headers
+
+FreeBSD:
+  o NETGRAPH, NETGRAPH_BPF, NETGRAPH_ETHER, NETGRAPH_SOCKET enabled in
+    your kernel config
+  o libdnet development library and headers
+
+SEND has been tested on Linux kernel version 2.6.x, on these distributions:
+Fedora Core 2 - 4, Ubuntu 5.10, and SUSE 10.0. It has also been tested on
+FreeBSD 5.4.
+
+QUICK START
+===========
+1. Edit top level Makefile.config to set your OS type.
+
+2. make
+
+3. make install
+
+4. Generate keys and CGA paramaters using cgatool.
+
+5. cp examples/sendd.conf /etc/sendd.conf.
+
+6. Edit /etc/sendd.conf.
+
+7. Run sendd.
+
+Questions, comments, or feedback: send email to <docomo-send@docomolabs-usa.com>

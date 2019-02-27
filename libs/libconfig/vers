@@ -1,0 +1,9 @@
+VERSION {
+	VER_0.0 {
+	global:
+		config_fini;
+		config_get;
+		config_init;
+	local: *;
+	};
+};

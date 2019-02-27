@@ -1,0 +1,20 @@
+VERSION {
+	VER_0.0 {
+	global:
+		htbl_add;
+		htbl_create;
+		htbl_destroy;
+		htbl_find;
+		htbl_rem;
+		htbl_walk;
+		hash_string;
+		hash_l2addr;
+		hash_in6_addr;
+		hash_in_addr;
+	local: *;
+	};
+	VER_0.1 {
+	global:
+		htbl_rem_hit;
+	};
+};

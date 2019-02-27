@@ -1,0 +1,20 @@
+VERSION {
+	VER_0.0 {
+	global:
+		thrpool_init;
+		thrpool_req;
+		thrpool_set_max;
+		thrpool_set_min;
+		thrpool_set_q_size;
+		thr_specific_get;
+		thr_specific_set_self;
+		thr_specific_get;
+		thr_specific_get_self;
+		thr_interrupt;
+	local: *;
+	};
+	VER_0.1 {
+	global:
+		thrpool_req_excl;
+	};
+};

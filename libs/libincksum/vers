@@ -1,0 +1,7 @@
+VERSION {
+	VER_0.0 {
+	global:
+		in_cksum;
+	local: *;
+	};
+};

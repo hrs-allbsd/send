@@ -1,0 +1,30 @@
+VERSION {
+	VER_0.0 {
+	global:
+		cga_cleanup_ctx;
+		cga_free_ctx;
+		cga_gen_cancel;
+		cga_generate;
+		cga_init;
+		cga_parse_params;
+		cga_parse_params_ctx;
+		cga_verify;
+		new_cga_ctx;
+		cga_set_der;
+		cga_get_der;
+		cga_set_modifier;
+		cga_get_modifier;
+		cga_set_addr;
+		cga_set_prefix;
+		cga_set_sec;
+		cga_set_col;
+		cga_version;
+		cga_der2key;
+		cga_der2keys;
+		cga_key2der;
+		cga_load_cert;
+		cga_load_key;
+		cga_set_key;
+	local: *;
+	};
+};

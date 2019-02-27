@@ -1,0 +1,25 @@
+ARLIB= lib$(LIB).a
+INSARCHIVE= $(PREFIXLIB)/$(ARLIB)
+# filter out vers
+AROBJS= $(filter %.o,$(OBJS))
+
+BLDAR= $(BLDLIB_INST)/$(ARLIB)
+
+archive_y: $(AROBJS) $(BLDAR)
+
+$(BLDAR): $(ARLIB)
+
+# We assume GNU ar, for which it is not necessary to run ranlib
+$(ARLIB): $(ARLIB)($(AROBJS))
+
+ifeq ($(CREATE_ARCHIVE),y)
+$(TESTS): $(ARLIB)
+endif
+
+archive_install_y: $(INSARCHIVE)
+
+archive_clean_y:
+	$(RM) $(ARLIB)
+
+archive_n archive_install_n archive_clean_n:
+

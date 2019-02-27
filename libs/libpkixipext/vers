@@ -1,0 +1,40 @@
+VERSION {
+	VER_0.0 {
+	global:
+		pkixip_add2stores_cert;
+		pkixip_add2stores_file;
+		pkixip_add_store;
+		pkixip_find_cert;
+		pkixip_get_mychain;
+		pkixip_get_store_ctx;
+		pkixip_load_cert;
+		pkixip_has_ext;
+		pkixip_my_chain_init;
+		pkixip_set_trustanchor_cb;
+		pkixip_set_wrapper;
+		pkixip_sign;
+		pkixip_write_ext;
+		pkixip_load_pkey;
+		pkixip_verify_cert;
+		pkixip_read_config;
+		pkixip_store_ctx_light_cleanup;
+		pkixip_walk_store;
+		pkixip_init;
+		pkixip_aor_cmp;
+		pkixip_ipf_cmp;
+		pkixip_version;
+		i2d_IPAddrBlocks;
+		i2v_IPAddrBlocks;
+		IPAddrBlocks_free;
+		IPAddrBlocks_new;
+		IPAddressFamily_free;
+		IPAddressFamily_new;
+		IPAddressOrRange_free;
+		IPAddressOrRange_new;
+		IPAddressRange_free;
+		IPAddressRange_new;
+		IPAddressChoice_free;
+		IPAddressChoice_new;
+	local: *;
+	};
+};

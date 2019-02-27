@@ -1,0 +1,251 @@
+#!/bin/sh
+
+#
+# Copyright © 2006, DoCoMo Communications Laboratories USA, Inc., the DoCoMo SEND Project
+# 
+#  Redistribution and use in source and binary forms, with or without
+#  modification, are permitted provided that the following conditions
+#  are met:
+# 
+# 1. Redistributions of source code must retain the above copyright
+#    notice, this list of conditions and the following disclaimer.
+# 2. Redistributions in binary form must reproduce the above copyright
+#    notice, this list of conditions and the following disclaimer in the
+#    documentation and/or other materials provided with the distribution.
+# 3. Neither the name of DoCoMo Communications Laboratories USA, Inc., its
+#    parents, affiliates, subsidiaries, theDoCoMo SEND Project nor the names of
+#    the Project's contributors may be used to endorse or promote products
+#    derived from this software without specific prior written permission.
+# 
+#  THIS SOFTWARE IS PROVIDED BY THE PROJECT AND CONTRIBUTORS ``AS IS'' AND
+#  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+#  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+#  ARE DISCLAIMED. IN NO EVENT SHALL DOCOMO COMMUNICATIONS LABORATORIES USA,
+#  INC., ITS PARENTS, AFFILIATES, SUBSIDIARIES, THE PROJECT OR THE PROJECT'S
+#  CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+#  EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+#  PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+#  OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+#  WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+#  OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+#  ADVISED OF THE POSSIBILITY OF SUCH DAMAGE."
+#
+
+# See the README file in this directory for usage
+
+#
+# Edit the following to reflect your configuration
+#
+
+# A list of IDs (internal to the script), in the order they appear in
+# certificate path. The CA is implicitly first. The IDs must match up
+# with the prefix definitions below, and the names of the subdirectories
+# containing the keying material.
+
+ids="lvl1"
+#ids="lvl1 ar1"
+#ids="ar2"
+#ids="ar3"
+#ids="router1"
+
+# For each ID in the list above, you must create a list of prefixes this
+# ID will be able to route.
+pfxs_ca="prefix 2000::/64;"
+pfxs_lvl1="prefix 2000::/64;"
+#pfxs_ar1="prefix 2000::/64;"
+	# prefix 2004::/64;
+	# prefix 2005::/64;"
+#pfxs_lvl1="prefix 2003::/64;
+	#prefix 2004::/64;"
+#pfxs_ar1="prefix 2003::/64;"
+#pfxs_ar2="prefix 2004::/64;"
+#pfxs_ar3="prefix 2005::/64;"
+
+# Where does CA.pl live on your system
+#CA=/usr/ssl/misc/CA.pl
+CA=/usr/home/anchie/p4/send_kernel_compile/crypto/openssl/apps/CA.pl
+
+# RSA key size
+rsa_bits=1024
+
+#
+# Done editing
+#
+
+fail() {
+    echo $1
+    exit 1
+}
+
+tell_user() {
+    echo "****************************************************"
+    echo $1
+    echo "****************************************************"
+}
+
+mk_ca() {
+	echo "----------------> mk_ca()"
+    rm -f demoCA
+    mkdir -p demoCA.$1/private
+    ln -s demoCA.$1 demoCA
+    cp $1/key.pem demoCA/private/cakey.pem
+    cp $1/cert.pem demoCA/cacert.pem
+    $CA -newca || fail "newca failed"
+    echo "00" > demoCA/serial
+}
+
+generate_cert() {
+    tell_user "Creating certificate for $1"
+    mkdir $1
+    openssl genrsa -out $1/key.pem $rsa_bits
+    openssl req -new -key $1/key.pem -out newreq.pem
+    tell_user "Signing certificate for $1"
+    $CA -sign || fail "sign failed"
+    mv newcert.pem $1/cert.pem
+}
+
+# assumes CA cert already in place in demoCA
+generate_certs() {
+    for id in $ids; do
+	generate_cert $id
+	mk_ca $id
+    done
+}
+
+mk_top_ca() {
+    tell_user "Making new top level CA"
+    $CA -newca || fail "newca failed"
+    mkdir ca
+    cp demoCA/private/cakey.pem ca/key.pem
+    cp demoCA/cacert.pem ca/cert.pem
+    mv demoCA demoCA.ca
+    ln -s demoCA.ca demoCA
+}
+
+add_files_section() {
+    echo "files {" >>  $2
+    for id in $ids; do
+	echo "$id"
+	test $id != $1 && fname="trustedcert" || fname="certfile"
+	echo "  $fname `pwd`/$id/cert_ipext.pem;" >> $2
+	test $id = $1 && break
+    done
+    echo "}" >> $2
+}
+
+gen_conf_file() {
+    # Generate a config file for adding IP extensions
+    #pfxs=pfxs_${1}
+
+    echo "addresses {" > $1/ipext_add.conf
+    echo "  ipv6 {" >>  $1/ipext_add.conf
+    echo "    SAFI unicast;" >>  $1/ipext_add.conf
+	if test $1 = "ca" 
+	then
+		echo "   " $pfxs_ca >>  $1/ipext_add.conf
+	fi
+	if test $1 = "lvl1"
+	then 
+		echo "   " $pfxs_lvl1 >>  $1/ipext_add.conf
+	fi
+
+    #echo "   " $pfxs_ca >>  $1/ipext_add.conf
+    echo "  }" >>  $1/ipext_add.conf
+    echo "}" >>  $1/ipext_add.conf
+	
+    echo "files {" >>  $1/ipext_add.conf
+    echo "  certfile $1/cert.pem;" >>  $1/ipext_add.conf
+    echo "  cacert $2/cert.pem;" >>  $1/ipext_add.conf
+    echo "  capriv $2/key.pem;" >>  $1/ipext_add.conf
+    echo "  outfile $1/cert_ipext.pem;" >>  $1/ipext_add.conf
+    echo "}" >>  $1/ipext_add.conf
+
+    # Generate a config file suitable for use with sendd
+    echo "" > "$1/ipext.conf"
+    add_files_section $1 "$1/ipext.conf"
+}
+
+gen_conf_files() {
+    prev_id=ca
+    for id in $ids; do
+	gen_conf_file $id $prev_id
+	prev_id=$id
+    done
+}
+
+verify_ipexts() {
+    #pfxs=pfxs_${1}
+
+    echo "addresses {" > ipext_verify.conf
+    echo "  ipv6 {" >> ipext_verify.conf
+    echo "    SAFI unicast;" >> ipext_verify.conf
+	if test $1 = "ca"
+	then
+		echo "   " $pfxs_ca >>  $1/ipext_add.conf
+	fi
+	if test $1 = "lvl1"
+	then 
+		echo "   " $pfxs_lvl1 >>  $1/ipext_add.conf
+	fi
+    #echo "    ${!pfxs}" >> ipext_verify.conf
+    echo "  }" >> ipext_verify.conf
+    echo "}" >> ipext_verify.conf
+
+    add_files_section $1 ipext_verify.conf
+}
+
+add_ipext() {
+    echo "Adding IP extensions for $1"
+    /usr/sbin/ipexttool -w -i $1/ipext_add.conf
+}
+
+add_ipexts() {
+    for id in $ids; do
+	add_ipext $id
+    done
+
+	/usr/sbin/ipexttool -w -i ca/ipext_add.conf
+	/usr/sbin/ipexttool -w -i lvl1/ipext_add.conf
+
+    verify_ipexts $id
+}
+
+case "$1" in
+    chain)
+	if [ $# -eq 1 ]; then
+	    mk_top_ca
+	    generate_certs
+	    ids="ca $ids"
+	    gen_conf_files
+	    add_ipexts
+	else
+	    if [ $# -ne 3 ]; then
+		echo $"Usage: $0 chain <new id> <signer id>"
+		exit 1
+	    fi
+	    rm -f demoCA
+	    ln -s demoCA.$3 demoCA
+	    generate_cert $2
+	    ids="ca $ids"
+	    gen_conf_file $2 $3
+	    add_ipext $2
+	fi
+	;;
+    ipext)
+	ids="ca $ids"
+	if [ $# -eq 1 ]; then
+	    gen_conf_files
+	    add_ipexts
+	else
+	    if [ $# -ne 3 ]; then
+		echo $"Usage: $0 ipext <new id> <signer id>"
+		exit 1
+	    fi
+	    gen_conf_file $2 $3
+	    add_ipext $2
+	fi
+	;;
+    *)
+	echo $"Usage: $0 {chain|ipext}"
+	exit 1
+esac

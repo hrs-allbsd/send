@@ -1,0 +1,28 @@
+VERSION {
+	VER_1.0 {
+	global:
+		debug_mask;
+		dlog;
+		log_all_on;
+		applog_addlevel;
+		applog_clearlevel;
+		applog_dbg;
+		applog_printlevels;
+		applog_print_curlevels;
+		applog_dhexdump;
+		mac2str;
+		mac2str_r;
+		str2mac;
+		applog_hexdump;
+		applog;
+		applog_open;
+		applog_register;
+		applog_enable_level;
+		applog_disable_level;
+		applog_get_methods;
+		applog_str2method;
+		applog_stacktrace;
+		applog_set_method;
+	local: *;
+	};
+};

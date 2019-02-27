@@ -1,0 +1,2 @@
+This just contains stubs so that we can compile on an OS without
+implementing OS-specific support.

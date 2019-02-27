@@ -1,0 +1,43 @@
+LIBLINK= lib$(LIB).so
+LIBVERS= $(LIBLINK).$(VERSION)
+INSLIBLINK= $(PREFIXLIB)/lib$(LIB).so
+INSLIB= $(INSLIBLINK).$(VERSION)
+
+BLDLIBLINK= $(BLDLIB_INST)/lib$(LIB).so
+BLDLIB= $(BLDLIBLINK).$(VERSION)
+BLDLIBS= $(BLDLIB) $(BLDLIBLINK)
+
+ifneq ($(CREATE_ARCHIVE),y)
+# need to dynamically link the test programs
+$(TESTS) : LDLIBS += -l$(LIB)
+comma:= ,
+$(TESTS) : LDFLAGS += -Wl$(comma)-rpath $(BLDLIB_INST)
+
+$(TESTS): $(LIBLINK)
+endif	# CREATE_ARCHIVE
+
+shared_y:  $(LIBLINK) $(BLDLIBS)
+
+$(LIBLINK): $(LIBVERS)
+	$(RM) $@
+	ln -s $(LIBVERS) $@
+
+$(LIBVERS): $(OBJS)
+	$(LD) -shared -o $@ $(OBJS) $(LDFLAGS) $(LDLIBS)
+
+shared_install_y: shared  $(INSLIB) dlink $(INSLIBLINK)
+
+dlink:
+	$(RM) $(INSLIBLINK)
+
+$(INSLIBLINK):
+	cd $(PREFIXLIB); ln -s $(LIBVERS) $(LIBLINK)
+
+$(BLDLIBLINK):
+	$(RM) $@
+	cd $(BLDLIB_INST); ln -s $(LIBVERS) $(LIBLINK)
+
+shared_clean_y:
+	$(RM) $(LIBLINK) $(LIBVERS)
+
+shared_n shared_install_n shared_clean_n:

@@ -1,0 +1,13 @@
+*) 4/2006: version 0.2 released
+
+	*) CGA paramaters granularity is now per-address or per-interface
+	*) Library and interface for remote administration of CGA paramaters
+	*) libcga can handle multi-key CGAs
+	*) Fixed up OpenSSL error reporting
+	*) pkixip's lex and yacc functions now are prefixed with pkixip_
+	*) Enhanced readability of applog's timestamp output
+	*) running sendd with -ddd would not enable dbg_snd
+	*) snd_replace_linklocals was not being honored
+	*) Lots of other bug fixes
+
+*) 11/9/2005: version 0.1 released

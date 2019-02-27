@@ -1,0 +1,10 @@
+
+Included here is a sample sendd.conf with commented parameters. There
+are three subdirectories containing more extensive examples:
+
+  cgatool	The CGA example from RFC 3972
+  ipext		Router discovery certificate chain management with PKIX IP
+		extentions
+  no_rdisc	Send configuration files and keying material for a scenario
+		not involving router discovery
+
